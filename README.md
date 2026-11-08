@@ -1,6 +1,6 @@
 # Pořádání soutěže
 
-Pomocník pro pořadatele závodů ve skákání přes švihadlo. Pořadatel si v pěti krocích naklikne, jaký závod pořádá. Aplikace z toho sestaví checklist: úkoly podle témat, personál, vybavení s množstvím, počet medailí a co zajistit v hale.
+Pomocník pro pořadatele závodů v Jump Rope (závodní skákání přes švihadlo). Pořadatel si v pěti krocích naklikne, jaký závod pořádá. Aplikace z toho sestaví checklist: úkoly podle témat, personál, vybavení s množstvím, počet medailí a co zajistit v hale.
 
 - Jeden soubor `index.html`, bez serveru a bez externích knihoven.
 - Data zůstávají v prohlížeči pořadatele. Sdílet se dají odkazem nebo zálohou do souboru.
