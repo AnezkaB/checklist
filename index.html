@@ -117,23 +117,23 @@ body[data-pohled="pruvodce"] .krok { padding-bottom: 32px; }
 .otazka { display: block; font-weight: 700; margin-bottom: 8px; font-size: 1.02rem; padding: 0; }
 .napoveda { color: var(--muted); font-size: .92rem; margin-top: 8px; }
 
-.dlazdice { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
-/* Dlaždice s popisem: dva sloupce na šířku, na mobilu řádky s názvem vlevo a popisem vpravo. */
-.dlazdice.s-popisem { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.dlazdice.s-popisem label { min-height: 0; padding: 10px 32px 10px 14px; }
+/* Dlaždice: všechny možnosti v jednom řádku, každá jen tak široká, jak je potřeba. Vybraná = modrý rámeček a podklad. */
+.dlazdice { display: grid; gap: 8px; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); max-width: calc(var(--n, 2) * 190px); }
+.dlazdice.s-popisem { max-width: calc(var(--n, 2) * 210px); }
+.dlazdice.uzke { grid-template-columns: repeat(auto-fill, minmax(72px, 96px)); max-width: none; }
 @media (max-width: 560px) {
-  .dlazdice.s-popisem label { grid-template-columns: 44px 1fr; align-items: center; gap: 0 8px; }
-  .dlazdice.s-popisem .nazev { font-size: 1.05rem; }
+  .dlazdice { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); max-width: none; }
+  .dlazdice.s-popisem { grid-template-columns: minmax(0, 1fr); }
+  .dlazdice.s-popisem label { grid-template-columns: auto 1fr; align-items: center; gap: 0 12px; }
+  .dlazdice.s-popisem .nazev { font-size: 1.05rem; min-width: 32px; }
+  .dlazdice.uzke { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
 }
-.dlazdice.uzke { grid-template-columns: repeat(auto-fill, minmax(96px, 120px)); }
-.dlazdice.stredni { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); max-width: calc(var(--n, 2) * 220px); }
-.dlazdice label { position: relative; display: grid; gap: 4px; align-content: center; min-height: 52px; padding: 10px 32px 10px 14px; border: 1px solid var(--line-2); border-radius: var(--r); background: var(--surface); cursor: pointer; }
+.dlazdice label { position: relative; display: grid; gap: 4px; align-content: center; min-height: 52px; padding: 10px 14px; border: 1px solid var(--line-2); border-radius: var(--r); background: var(--surface); cursor: pointer; }
 .dlazdice label:hover { border-color: var(--navy); }
 .dlazdice input { position: absolute; opacity: 0; pointer-events: none; }
 .dlazdice .nazev { font-weight: 700; }
 .dlazdice .popis { color: var(--muted); font-size: .88rem; line-height: 1.35; }
 .dlazdice label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
-.dlazdice label:has(input:checked)::after { content: ""; position: absolute; top: 10px; right: 10px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 0 0 4px var(--accent-soft); border: 2px solid var(--accent); box-sizing: border-box; }
 .dlazdice label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .chipy { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -620,7 +620,7 @@ function htmlOtazka(b, z, c) {
     case "dlazdice": {
       const v = String(z.cfg[b.id] ?? "");
       return `<fieldset class="blok"><legend class="otazka">${esc(p.otazka)}</legend>
-        <div class="dlazdice${b.uzke ? " uzke" : b.popisy ? " s-popisem" : " stredni"}" style="--n:${p.moznosti.length}">${p.moznosti.map(mo => `<label><input type="radio" name="q-${esc(b.id)}" value="${esc(mo)}" data-p="${esc(b.id)}"${v === mo ? " checked" : ""}>
+        <div class="dlazdice${b.uzke ? " uzke" : b.popisy ? " s-popisem" : ""}" style="--n:${p.moznosti.length}">${p.moznosti.map(mo => `<label><input type="radio" name="q-${esc(b.id)}" value="${esc(mo)}" data-p="${esc(b.id)}"${v === mo ? " checked" : ""}>
           <span class="nazev">${esc(nazevMoznosti(b.id, mo))}</span>${b.popisy && b.popisy[mo] ? `<span class="popis">${esc(b.popisy[mo])}</span>` : ""}</label>`).join("")}</div>${napoveda}</fieldset>`;
     }
     case "prepinac":
