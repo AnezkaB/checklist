@@ -79,7 +79,10 @@ a { color: inherit; }
 
 /* Šedá plocha končí s obsahem; pod ní je bílá (u průvodce s tlačítky Zpět / Pokračovat). */
 main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 32px; background: var(--paper); box-shadow: 0 0 0 100vmax var(--paper); clip-path: inset(0 -100vmax); }
+/* Průvodce: šedá plocha má dole stejný vzduch jako u ostatních obrazovek, lišta s tlačítky je až pod ní. */
 body[data-pohled="pruvodce"] main { padding-bottom: 0; }
+body[data-pohled="pruvodce"] .krok { padding-bottom: 32px; }
+@media (max-width: 560px) { body[data-pohled="pruvodce"] .krok { padding-bottom: 24px; } main { padding-bottom: 24px; } }
 @media (max-width: 560px) { main { padding-top: 16px; } }
 
 /* --- tlačítka */
@@ -158,8 +161,8 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .cisla label { display: grid; gap: 4px; font-weight: 600; font-size: .92rem; }
 
 /* Lišta je hned pod otázkami; u dlouhého kroku se drží spodního okraje obrazovky. */
-.dolni-lista { position: sticky; bottom: 0; max-width: 720px; margin: 24px auto 0; background: var(--surface); box-shadow: 0 0 0 100vmax var(--surface); clip-path: inset(0 -100vmax); z-index: 5; }
-.dolni-lista .in { padding: 12px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dolni-lista { position: sticky; bottom: 0; max-width: 720px; margin: 0 auto; background: var(--surface); box-shadow: 0 0 0 100vmax var(--surface); clip-path: inset(0 -100vmax); z-index: 5; }
+.dolni-lista .in { padding: 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dolni-lista .pocet-kroku { color: var(--muted); font-size: .92rem; }
 
 /* --- checklist */
