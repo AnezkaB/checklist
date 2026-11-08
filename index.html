@@ -223,6 +223,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .pol.hotovo .text { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1.5px; }
 .pol.neplati { opacity: .5; }
 .pol .zapis input { min-height: 42px; }
+.zapis-popisek { display: none; }
 .pol .smazat { margin-top: 6px; background: none; border: 0; color: var(--crit); cursor: pointer; padding: 4px 0; font-size: .88rem; text-decoration: underline; }
 .skryte { color: var(--muted); font-size: .9rem; padding: 4px 0; border-top: 1px solid var(--line); }
 .skryte button { background: none; border: 0; padding: 6px 2px; min-height: 44px; color: var(--ink); text-decoration: underline; cursor: pointer; font-weight: 600; }
@@ -260,7 +261,9 @@ textarea { min-height: 110px; font-family: ui-monospace, Menlo, Consolas, monosp
   .pol.se-zapisem .zapis { grid-column: auto; margin: 0; }
   .pol input[type="checkbox"] { width: 4.2mm; height: 4.2mm; border: 1pt solid #000; border-radius: 1px; }
   .pol input[type="checkbox"]:checked { background: #000; }
-  .pol .zapis input { border: 0; border-bottom: .6pt solid #000; border-radius: 0; min-height: 0; padding: 0 0 1mm; background: none; box-shadow: none; }
+  /* Pole na jména: popisek nad rámečkem, do kterého se píše – ne samotná čára, která splývá s oddělovači řádků. */
+  .zapis-popisek { display: block; font-size: 7.5pt; color: #555; margin-bottom: .6mm; }
+  .pol .zapis input { border: .5pt solid #888; border-radius: 1.5mm; min-height: 0; height: 7.5mm; padding: 0 2mm; font-size: 9pt; background: none; box-shadow: none; }
   .pol .zapis input::placeholder { color: transparent; }
   .pol.neplati { display: none; }
 }
@@ -705,7 +708,7 @@ function htmlRadek(r, platna) {
     <div><label for="${id}">${kolik}<span class="text">${esc(velke(r.text))}</span>${r.vlastni ? `<span class="stitek">${T.vlastni}</span>` : ""}${!platna ? `<span class="stitek">${T.neplati}</span>` : ""}</label>
       ${r.mnozstvi ? `<div class="mnozstvi">${esc(r.mnozstvi)}</div>` : ""}${r.rozpis || ""}${r.info ? `<div class="info">${esc(velke(r.info))}</div>` : ""}
       ${r.vlastni ? `<button type="button" class="smazat" data-smazat="${esc(r.id)}">${T.smazat}</button>` : ""}</div>
-    ${tema.zapis ? `<div class="zapis"><label for="z-${esc(r.id)}" class="vh">${esc(tema.zapis)} – ${esc(r.text)}</label><input type="text" id="z-${esc(r.id)}" data-zapis="${esc(r.id)}" placeholder="${esc(tema.zapis)}" value="${esc(z.zapis[r.id] || "")}" maxlength="200" autocomplete="off"></div>` : ""}
+    ${tema.zapis ? `<div class="zapis"><span class="zapis-popisek" aria-hidden="true">${esc(tema.zapis)}</span><label for="z-${esc(r.id)}" class="vh">${esc(tema.zapis)} – ${esc(r.text)}</label><input type="text" id="z-${esc(r.id)}" data-zapis="${esc(r.id)}" placeholder="${esc(tema.zapis)}" value="${esc(z.zapis[r.id] || "")}" maxlength="200" autocomplete="off"></div>` : ""}
   </li>`;
 }
 function popisPodskupiny(tema, pod, radky, c) {
