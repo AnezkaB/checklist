@@ -878,7 +878,7 @@ function exportTabulky() {
   const out = [T.sloupce];
   for (const t of TEMATA) for (const r of radky.filter(x => x.tema === t.id).sort((a, b) => a.poradi - b.poradi)) {
     const sk = r.podskupina ? (t.id === "vybaveni" ? T.typVeci[r.podskupina] : T.smeny[r.podskupina]) || r.podskupina : "";
-    out.push([t.nazev, sk, velke(r.text), r.kolik && r.kolik !== "1" ? r.kolik : "", r.mnozstvi || "", velke(r.info || ""), z.zapis[r.id] || "", z.hotovo[r.id] ? T.ano : ""]);
+    out.push([t.nazev, sk, velke(r.text), r.kolik && r.kolik !== "1" ? r.kolik + (/^[\d–-]+$/.test(r.kolik) ? "×" : "") : "", r.mnozstvi || "", velke(r.info || ""), z.zapis[r.id] || "", z.hotovo[r.id] ? T.ano : ""]);
   }
   return ulozSoubor(jmenoSouboru(z, "-checklist.csv"), "\uFEFF" + out.map(r => r.map(q).join(";")).join("\r\n"), "text/csv");
 }
