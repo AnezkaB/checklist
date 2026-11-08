@@ -70,7 +70,15 @@ a { color: inherit; }
 .muted { color: var(--muted); }
 
 /* --- horní lišta */
-.lista-app { background: var(--navy); color: var(--on-navy); border-bottom: 3px solid var(--green); position: sticky; top: var(--posun, 0px); z-index: 10; }
+.lista-app { background: var(--navy); color: var(--on-navy); border-bottom: 3px solid var(--green); position: sticky; top: 0; z-index: 10; }
+/* V rámu na cizím webu lišta nejede s posunem stránky (zpožděné přepočítávání by ji rozvibrovalo). */
+html.v-ramu .lista-app { position: relative; }
+html.v-ramu .temata { top: var(--posun, 0px); }
+html.v-ramu .tema { scroll-margin-top: 72px; }
+@media (min-width: 920px) {
+  html.v-ramu .temata { top: calc(var(--posun, 0px) + 16px); max-height: calc(var(--vh, 100vh) - 32px); }
+  html.v-ramu .tema { scroll-margin-top: 16px; }
+}
 .lista-app .in { max-width: 1080px; margin: 0 auto; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .znacka { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; min-height: 44px; white-space: nowrap; }
 .akce-app { display: flex; gap: 4px; }
@@ -1154,8 +1162,7 @@ let posunZprava = null;
 window.addEventListener("message", (e) => {
   const d = e.data;
   if (!d || d.typ !== "poradani-souteze:posun" || window.parent === window) return;
-  if (!posunZprava) requestAnimationFrame(prepocitejPosun);
-  posunZprava = d;
+  posunZprava = d; prepocitejPosun();
 });
 function prepocitejPosun() {
   const d = posunZprava; posunZprava = null; if (!d) return;
@@ -1171,6 +1178,7 @@ function nahoruVRamu() { if (spusteno && window.parent !== window) try { window.
 
 /* ============================================================ start */
 async function start() {
+  if (window.parent !== window) document.documentElement.classList.add("v-ramu");
   uloziste.init();
   nactiStahovani();
   S = uloziste.nacti();
