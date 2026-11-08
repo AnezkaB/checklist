@@ -73,6 +73,12 @@ a { color: inherit; }
 .lista-app { background: var(--navy); color: var(--on-navy); border-bottom: 3px solid var(--green); position: sticky; top: 0; z-index: 10; }
 /* V rámu na cizím webu lišta nejede s posunem stránky (zpožděné přepočítávání by ji rozvibrovalo). */
 html.v-ramu .lista-app { position: relative; }
+/* Samostatná stránka: při posunu dolů lišta zajede, při posunu nahoru se ukáže. */
+.lista-app { transition: transform .2s ease; }
+body.lista-skryta .lista-app { transform: translateY(-100%); }
+body.lista-skryta .temata { top: 0; }
+@media (min-width: 920px) { body.lista-skryta .temata { top: 16px; } }
+@media (prefers-reduced-motion: reduce) { .lista-app { transition: none; } }
 html.v-ramu .temata { top: var(--posun, 0px); }
 html.v-ramu .tema { scroll-margin-top: 72px; }
 @media (min-width: 920px) {
@@ -200,7 +206,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
   .temata ul { flex-direction: column; overflow: visible; }
   .temata a { border-color: transparent; background: none; padding: 6px 12px; min-height: 36px; }
   /* Menu se drží u horního okraje; když je delší než okno, posouvá se samo. */
-  .temata { max-height: calc(var(--vh, 100vh) - 96px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .temata { max-height: calc(var(--vh, 100vh) - 96px); overflow-y: auto; scrollbar-width: thin; }
   .temata a[aria-current="true"] { background: var(--surface); border-color: var(--line); box-shadow: inset 3px 0 0 var(--navy); }
   .temata a:hover { background: var(--surface); border-color: var(--line); }
 }
@@ -1214,6 +1220,15 @@ async function start() {
     $("#odkaz-ne").onclick = () => { $("#odkaz-banner").remove(); try { history.replaceState(null, "", "#checklist"); } catch (e) {} };
   }
   if ("ResizeObserver" in window) new ResizeObserver(posliVysku).observe(document.body);
+  if (window.parent === window) {
+    let posledni = window.scrollY;
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY, d = y - posledni;
+      if (Math.abs(d) < 6) return;
+      document.body.classList.toggle("lista-skryta", d > 0 && y > 120);
+      posledni = y;
+    }, { passive: true });
+  }
   spusteno = true;
   window.addEventListener("load", posliVysku);
 }
