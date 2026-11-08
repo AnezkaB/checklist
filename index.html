@@ -78,7 +78,7 @@ a { color: inherit; }
 .odkaz:hover { background: rgba(255,255,255,.2); }
 
 /* Šedá plocha končí s obsahem; pod ní je bílá (u průvodce s tlačítky Zpět / Pokračovat). */
-main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 32px; background: var(--paper); box-shadow: 0 0 0 100vmax var(--paper); clip-path: inset(0 -100vmax); }
+main { padding: 24px max(16px, calc((100% - 1048px) / 2)) 32px; background: var(--paper); }
 /* Průvodce: šedá plocha má dole stejný vzduch jako u ostatních obrazovek, lišta s tlačítky je až pod ní. */
 body[data-pohled="pruvodce"] main { padding-bottom: 0; }
 body[data-pohled="pruvodce"] .krok { padding-bottom: 32px; }
@@ -988,42 +988,28 @@ function potvrdDvakrat(btn, akce) {
   setTimeout(() => { if (cekaNaPotvrzeni === btn) { cekaNaPotvrzeni = null; btn.textContent = puvodni; btn.classList.remove("potvrd"); } }, 4000);
 }
 function zaznamenejNavstevu() { const z = Z(); z.ui.navstiveno = Math.max(z.ui.navstiveno || 0, krok + 1); }
-/* Zvýraznění tématu, ve kterém právě jsem, a jeho posun do viditelné části menu.
-   Aktivní je poslední téma, jehož začátek už přejel pod lištu a menu nahoře;
-   na konci stránky poslední téma. Počítá se při každém posunu stránky. */
-let pozorovatel = null, aktivniTema = null;
+/* Zvýraznění tématu, které je právě vidět, a jeho posun do viditelné části menu. */
+let pozorovatel = null;
 function sledujTemata() {
-  if (pozorovatel) window.removeEventListener("scroll", pozorovatel);
-  aktivniTema = null;
-  let ceka = false;
-  const prepocti = () => {
-    ceka = false;
+  if (pozorovatel) pozorovatel.disconnect();
+  if (!("IntersectionObserver" in window)) return;
+  const viditelne = new Map();
+  pozorovatel = new IntersectionObserver((zaznamy) => {
+    for (const z of zaznamy) viditelne.set(z.target.id, z.isIntersecting ? z.boundingClientRect.top : null);
     const sekce = [...document.querySelectorAll("section.tema")];
-    if (!sekce.length) return;
-    const nav = document.querySelector(".temata");
-    const ul = nav && nav.querySelector("ul");
-    const nahore = ul && getComputedStyle(ul).flexDirection !== "column";
-    /* kotvy mají scroll-margin-top 130 px – téma po kliknutí v menu musí vyjít jako aktivní */
-    const hranice = Math.max(140, nahore ? nav.getBoundingClientRect().bottom + 24 : 0);
-    let akt = sekce[0];
-    for (const s of sekce) if (s.getBoundingClientRect().top <= hranice) akt = s;
-    if (innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) akt = sekce[sekce.length - 1];
-    if (akt.id === aktivniTema) return;
-    aktivniTema = akt.id;
+    const prvni = sekce.find(s => viditelne.get(s.id) != null) || (window.scrollY < 200 ? sekce[0] : null);
+    if (!prvni) return;
     for (const a of document.querySelectorAll(".temata a")) {
-      const ano = a.dataset.kotva === akt.id;
-      if (ano) {
+      const ano = a.dataset.kotva === prvni.id;
+      if (ano && a.getAttribute("aria-current") !== "true") {
         a.setAttribute("aria-current", "true");
-        const n = a.closest(".temata"), ul = a.closest("ul");
-        if (n.scrollHeight > n.clientHeight) n.scrollTo({ top: a.offsetTop - n.clientHeight / 2, behavior: "smooth" });
-        else if (ul.scrollWidth > ul.clientWidth) ul.scrollTo({ left: a.offsetLeft - ul.clientWidth / 2 + a.offsetWidth / 2, behavior: "smooth" });
-      } else a.removeAttribute("aria-current");
+        const nav = a.closest(".temata"), ul = a.closest("ul");
+        if (nav.scrollHeight > nav.clientHeight) { const t = a.offsetTop - nav.clientHeight / 2; nav.scrollTo({ top: t, behavior: "smooth" }); }
+        else if (ul.scrollWidth > ul.clientWidth) ul.scrollTo({ left: a.offsetLeft - 16, behavior: "smooth" });
+      } else if (!ano) a.removeAttribute("aria-current");
     }
-  };
-  pozorovatel = () => { if (!ceka) { ceka = true; requestAnimationFrame(prepocti); } };
-  window.addEventListener("scroll", pozorovatel, { passive: true });
-  window.addEventListener("resize", pozorovatel, { passive: true });
-  prepocti();
+  }, { rootMargin: "-140px 0px -55% 0px" });
+  for (const s of document.querySelectorAll("section.tema")) pozorovatel.observe(s);
 }
 function napoj() {
   const m = $("#obsah-stranky");
