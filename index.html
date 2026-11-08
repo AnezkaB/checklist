@@ -55,7 +55,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { background: var(--surface); color: var(--ink); font: 16px/1.5 var(--body); -webkit-text-size-adjust: 100%; }
+body { overflow-x: clip; background: var(--surface); color: var(--ink); font: 16px/1.5 var(--body); -webkit-text-size-adjust: 100%; }
 h1, h2, h3 { font-family: var(--display); font-weight: 800; line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: -.02em; }
 h1, .h-stranky { font-size: clamp(1.75rem, 5vw, 2.3rem); }
 .lista-app h1 { font-size: 1.3rem; letter-spacing: -.01em; }
@@ -161,8 +161,8 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .cisla label { display: grid; gap: 4px; font-weight: 600; font-size: .92rem; }
 
 /* Lišta je hned pod otázkami; u dlouhého kroku se drží spodního okraje obrazovky. */
-.dolni-lista { position: sticky; bottom: 0; max-width: 720px; margin: 0 auto; background: var(--surface); box-shadow: 0 0 0 100vmax var(--surface); clip-path: inset(0 -100vmax); z-index: 5; }
-.dolni-lista .in { padding: 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dolni-lista { position: sticky; bottom: 0; width: 100vw; margin-left: calc(50% - 50vw); background: var(--surface); z-index: 5; }
+.dolni-lista .in { max-width: 752px; margin: 0 auto; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dolni-lista .pocet-kroku { color: var(--muted); font-size: .92rem; }
 
 /* --- checklist */
