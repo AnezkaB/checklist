@@ -70,7 +70,7 @@ a { color: inherit; }
 .muted { color: var(--muted); }
 
 /* --- horní lišta */
-.lista-app { background: var(--navy); color: var(--on-navy); border-bottom: 3px solid var(--green); position: sticky; top: 0; z-index: 10; }
+.lista-app { background: var(--navy); color: var(--on-navy); border-bottom: 3px solid var(--green); position: sticky; top: var(--posun, 0px); z-index: 10; }
 .lista-app .in { max-width: 1080px; margin: 0 auto; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .znacka { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; min-height: 44px; white-space: nowrap; }
 .akce-app { display: flex; gap: 4px; }
@@ -161,7 +161,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .cisla label { display: grid; gap: 4px; font-weight: 600; font-size: .92rem; }
 
 /* Lišta je hned pod otázkami; u dlouhého kroku se drží spodního okraje obrazovky. */
-.dolni-lista { position: sticky; bottom: 0; width: 100vw; margin-left: calc(50% - 50vw); background: var(--surface); z-index: 5; }
+.dolni-lista { position: sticky; bottom: var(--dole, 0px); width: 100vw; margin-left: calc(50% - 50vw); background: var(--surface); z-index: 5; }
 .dolni-lista .in { max-width: 752px; margin: 0 auto; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dolni-lista .pocet-kroku { color: var(--muted); font-size: .92rem; }
 
@@ -180,7 +180,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .rozlozeni { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
 .rozlozeni > * { min-width: 0; }
 @media (min-width: 920px) { .rozlozeni { grid-template-columns: 240px minmax(0, 1fr); gap: 24px; align-items: start; } }
-.temata { position: sticky; top: 63px; z-index: 3; background: var(--paper); padding: 8px 16px; margin: 0 -16px; }
+.temata { position: sticky; top: calc(var(--posun, 0px) + 63px); z-index: 3; background: var(--paper); padding: 8px 16px; margin: 0 -16px; }
 .temata ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin; }
 .temata a { display: flex; align-items: center; justify-content: space-between; gap: 10px; white-space: nowrap; text-decoration: none; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); font-weight: 600; font-size: .92rem; min-height: 40px; }
 .temata a:hover { border-color: var(--navy); }
@@ -188,11 +188,11 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .temata a .num { color: var(--muted); font-weight: 500; }
 .temata a.splneno .num { color: var(--ok); font-weight: 700; }
 @media (min-width: 920px) {
-  .temata { top: 80px; margin: 0; padding: 0; background: none; }
+  .temata { top: calc(var(--posun, 0px) + 80px); margin: 0; padding: 0; background: none; }
   .temata ul { flex-direction: column; overflow: visible; }
   .temata a { border-color: transparent; background: none; padding: 6px 12px; min-height: 36px; }
   /* Menu se drží u horního okraje; když je delší než okno, posouvá se samo. */
-  .temata { max-height: calc(100vh - 96px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .temata { max-height: calc(var(--vh, 100vh) - 96px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
   .temata a[aria-current="true"] { background: var(--surface); border-color: var(--line); box-shadow: inset 3px 0 0 var(--navy); }
   .temata a:hover { background: var(--surface); border-color: var(--line); }
 }
@@ -594,6 +594,7 @@ function jdi(cil, zapsat = true) {
   if (zapsat) { const h = pohled === "pruvodce" ? `krok-${krok + 1}` : pohled; try { if (location.hash !== "#" + h) history.replaceState(null, "", "#" + h); } catch (e) {} }
   vykresli();
   try { window.scrollTo({ top: 0 }); } catch (e) {}
+  nahoruVRamu();
 }
 function vykresli() {
   const m = $("#obsah-stranky");
@@ -1008,9 +1009,12 @@ function sledujTemata() {
     const nahore = ul && getComputedStyle(ul).flexDirection !== "column";
     /* kotvy mají scroll-margin-top 130 px – téma po kliknutí v menu musí vyjít jako aktivní */
     const hranice = Math.max(140, nahore ? nav.getBoundingClientRect().bottom + 24 : 0);
+    /* V rámu na cizím webu se posouvá stránka kolem rámu – její posun a výšku okna hlásí vkládací kód. */
+    const css = getComputedStyle(document.documentElement);
+    const posun = parseFloat(css.getPropertyValue("--posun")) || 0, okno = parseFloat(css.getPropertyValue("--vh")) || innerHeight;
     let akt = sekce[0];
-    for (const s of sekce) if (s.getBoundingClientRect().top <= hranice) akt = s;
-    if (innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) akt = sekce[sekce.length - 1];
+    for (const s of sekce) if (s.getBoundingClientRect().top - posun <= hranice) akt = s;
+    if (posun + okno + window.scrollY >= document.documentElement.scrollHeight - 4 && (window.scrollY > 0 || posun > 0)) akt = sekce[sekce.length - 1];
     if (akt.id === aktivniTema) return;
     aktivniTema = akt.id;
     for (const a of document.querySelectorAll(".temata a")) {
@@ -1133,13 +1137,30 @@ function vlozZpravu(t, chyba) { $("#obsah-stranky").insertAdjacentHTML("afterbeg
 
 /* ============================================================ výška pro iframe */
 let posledniVyska = 0;
+/* V rámu (iframe) na cizím webu: výška = výška obsahu, ne okna rámu – jinak by rám nikdy nezmenšil
+   a pod obsahem by zůstalo prázdné místo. */
 function posliVysku() {
   if (window.parent === window) return;
-  const h = Math.ceil(document.documentElement.scrollHeight);
+  const h = Math.ceil(document.body.getBoundingClientRect().height);
   if (Math.abs(h - posledniVyska) < 2) return;
   posledniVyska = h;
   try { window.parent.postMessage({ typ: "poradani-souteze:vyska", vyska: h }, "*"); } catch (e) {}
 }
+
+/* Rám se sám neposouvá – posouvá se stránka kolem něj. Když nám ji stránka hlásí (vkládací kód z README),
+   přepočítáme přilepené prvky (lišta, menu témat, tlačítka průvodce) podle okna stránky, ne podle rámu. */
+window.addEventListener("message", (e) => {
+  const d = e.data;
+  if (!d || d.typ !== "poradani-souteze:posun" || window.parent === window) return;
+  const top = Number(d.top) || 0, vh = Number(d.vh) || window.innerHeight, H = document.body.getBoundingClientRect().height;
+  const st = document.documentElement.style;
+  st.setProperty("--posun", Math.max(0, -top) + "px");
+  st.setProperty("--vh", vh + "px");
+  st.setProperty("--dole", Math.max(0, H - (vh - top)) + "px");
+  if (pozorovatel) pozorovatel();
+});
+let spusteno = false;
+function nahoruVRamu() { if (spusteno && window.parent !== window) try { window.parent.postMessage({ typ: "poradani-souteze:nahoru" }, "*"); } catch (e) {} }
 
 /* ============================================================ start */
 async function start() {
@@ -1160,6 +1181,8 @@ async function start() {
     try { odkaz = location.hash.startsWith("#k=") ? JSON.stringify(zKompaktni(JSON.parse(await rozbal(location.hash.slice(3))))) : b64dec(location.hash.slice(3)); }
     catch (e) { zprava = T.chybaZalohy; }
     if (odkaz && !(z.nazev || z.datum || Object.keys(z.hotovo).length)) { const r = nahraj(odkaz); zprava = r.ok ? T.odkazNacten : r.chyba; odkaz = null; }
+    /* Odkaz na stejný stav, jaký už prohlížeč má (např. vlastní odkaz otevřený znovu) – není se na co ptát. */
+    if (odkaz) { try { const d = JSON.parse(odkaz); if (d && d.zavod && JSON.stringify(kompaktni({ hotovo: {}, zapis: {}, vlastni: [], ...d.zavod })) === JSON.stringify(kompaktni(z))) odkaz = null; } catch (e) {} }
   }
   $("#nav-nastaveni").onclick = () => jdi("krok-1");
   $("#nav-ulozit").onclick = () => jdi("ulozit");
@@ -1176,6 +1199,7 @@ async function start() {
     $("#odkaz-ne").onclick = () => { $("#odkaz-banner").remove(); try { history.replaceState(null, "", "#checklist"); } catch (e) {} };
   }
   if ("ResizeObserver" in window) new ResizeObserver(posliVysku).observe(document.body);
+  spusteno = true;
   window.addEventListener("load", posliVysku);
 }
 start();
