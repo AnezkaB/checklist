@@ -164,6 +164,8 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); outline
 .dolni-lista { position: sticky; bottom: var(--dole, 0px); width: 100vw; margin-left: calc(50% - 50vw); background: var(--surface); z-index: 5; }
 .dolni-lista .in { max-width: 752px; margin: 0 auto; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dolni-lista .pocet-kroku { color: var(--muted); font-size: .92rem; }
+/* Na mobilu lišta s tlačítky nepřekrývá obsah – je až pod ním. */
+@media (max-width: 560px) { .dolni-lista { position: static; } }
 
 /* --- checklist */
 .souhrn-zavodu { display: grid; gap: 12px; margin-bottom: 16px; }
