@@ -1188,7 +1188,8 @@ async function start() {
   uloziste.init();
   nactiStahovani();
   S = uloziste.nacti();
-  if (!S || !S.zavody || !S.zavody[S.aktivni]) { const z = novyZavod(); S = { aktivni: z.id, zavody: { [z.id]: z } }; }
+  const novy = !S || !S.zavody || !S.zavody[S.aktivni];
+  if (novy) { const z = novyZavod(); S = { aktivni: z.id, zavody: { [z.id]: z } }; }
   if (Object.keys(S.zavody).length > 1) S.zavody = { [S.aktivni]: S.zavody[S.aktivni] };
   const z = Z();
   z.cfg = { ...vychoziCfg(), ...cistaCfg(z.cfg) };
@@ -1211,6 +1212,9 @@ async function start() {
   window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (/^krok-\d$/.test(h) || ["checklist", "ulozit"].includes(h)) jdi(h, false); });
   let h = location.hash.slice(1);
   if (!/^krok-\d$/.test(h) && !["checklist", "ulozit"].includes(h)) h = Z().ui.pruvodceHotov ? "checklist" : "krok-1";
+  /* Nový návštěvník (nic uloženého, nic z odkazu) začíná vždy prvním krokem – i když dostal adresu
+     zkopírovanou z jiné obrazovky (#krok-3, #ulozit, #checklist). */
+  if (novy && !Z().ui.pruvodceHotov) h = "krok-1";
   jdi(h);
   if (zprava) vlozZpravu(zprava);
   if (odkaz) {
