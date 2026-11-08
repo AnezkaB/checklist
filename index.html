@@ -1010,10 +1010,11 @@ function sledujTemata() {
     const ul = nav && nav.querySelector("ul");
     const nahore = ul && getComputedStyle(ul).flexDirection !== "column";
     /* kotvy mají scroll-margin-top 130 px – téma po kliknutí v menu musí vyjít jako aktivní */
-    const hranice = Math.max(140, nahore ? nav.getBoundingClientRect().bottom + 24 : 0);
+
     /* V rámu na cizím webu se posouvá stránka kolem rámu – její posun a výšku okna hlásí vkládací kód. */
     const css = getComputedStyle(document.documentElement);
     const posun = parseFloat(css.getPropertyValue("--posun")) || 0, okno = parseFloat(css.getPropertyValue("--vh")) || innerHeight;
+    const hranice = Math.max(140, nahore ? nav.getBoundingClientRect().bottom - posun + 24 : 0);
     let akt = sekce[0];
     for (const s of sekce) if (s.getBoundingClientRect().top - posun <= hranice) akt = s;
     if (posun + okno + window.scrollY >= document.documentElement.scrollHeight - 4 && (window.scrollY > 0 || posun > 0)) akt = sekce[sekce.length - 1];
@@ -1025,7 +1026,7 @@ function sledujTemata() {
         a.setAttribute("aria-current", "true");
         const n = a.closest(".temata"), ul = a.closest("ul");
         if (n.scrollHeight > n.clientHeight) n.scrollTo({ top: a.offsetTop - n.clientHeight / 2, behavior: "smooth" });
-        else if (ul.scrollWidth > ul.clientWidth) ul.scrollTo({ left: a.offsetLeft - ul.clientWidth / 2 + a.offsetWidth / 2, behavior: "smooth" });
+        else if (ul.scrollWidth > ul.clientWidth) ul.scrollLeft = a.offsetLeft - ul.clientWidth / 2 + a.offsetWidth / 2;
       } else a.removeAttribute("aria-current");
     }
   };
@@ -1151,16 +1152,22 @@ function posliVysku() {
 
 /* Rám se sám neposouvá – posouvá se stránka kolem něj. Když nám ji stránka hlásí (vkládací kód z README),
    přepočítáme přilepené prvky (lišta, menu témat, tlačítka průvodce) podle okna stránky, ne podle rámu. */
+let posunZprava = null;
 window.addEventListener("message", (e) => {
   const d = e.data;
   if (!d || d.typ !== "poradani-souteze:posun" || window.parent === window) return;
+  if (!posunZprava) requestAnimationFrame(prepocitejPosun);
+  posunZprava = d;
+});
+function prepocitejPosun() {
+  const d = posunZprava; posunZprava = null; if (!d) return;
   const top = Number(d.top) || 0, vh = Number(d.vh) || window.innerHeight, H = document.body.getBoundingClientRect().height;
   const st = document.documentElement.style;
   st.setProperty("--posun", Math.max(0, -top) + "px");
   st.setProperty("--vh", vh + "px");
   st.setProperty("--dole", Math.max(0, H - (vh - top)) + "px");
   if (pozorovatel) pozorovatel();
-});
+}
 let spusteno = false;
 function nahoruVRamu() { if (spusteno && window.parent !== window) try { window.parent.postMessage({ typ: "poradani-souteze:nahoru" }, "*"); } catch (e) {} }
 
